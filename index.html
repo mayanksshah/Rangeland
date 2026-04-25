@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>AI Agriculture System</title>
+<title>Namibia Agriculture AI</title>
 
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
@@ -16,22 +16,21 @@
 
 <div class="container">
 
-<!-- LEFT -->
 <div class="left">
 
-<div class="box">
-<h3>📍 Select Location</h3>
 <div id="map"></div>
-<p id="coords">Lat: -22.56 | Lon: 17.06</p>
-</div>
 
-<div class="box">
-<h3>📊 Choose Graph</h3>
+<select id="layerToggle">
+<option value="sat">Satellite</option>
+<option value="ndvi">NDVI Layer</option>
+</select>
 
 <select id="graphType">
 <option value="rain">Rainfall</option>
 <option value="temp">Temperature</option>
+<option value="ndvi">NDVI Index</option>
 <option value="combined">Combined</option>
+<option value="trend">Trend</option>
 </select>
 
 <canvas id="chart"></canvas>
@@ -41,25 +40,12 @@
 
 </div>
 
-</div>
-
-<!-- RIGHT -->
 <div class="right">
 
-<div class="box">
 <h3>📊 Results</h3>
-
-<p>🌿 Greenery: <span id="green">--</span></p>
-<p>💧 Water: <span id="water">--</span></p>
-<p>🌾 Crops: <span id="crops">--</span></p>
-
-</div>
-
-<div class="box">
-<h3>🤖 Chatbot</h3>
-<div id="chat"></div>
-<input id="input" placeholder="Ask something...">
-</div>
+<p>Crop: <span id="crop"></span></p>
+<p>NDVI: <span id="ndviVal"></span></p>
+<p>Yield: <span id="yield"></span></p>
 
 </div>
 
