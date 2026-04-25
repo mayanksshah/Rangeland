@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Agriculture System</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+
+<body>
+
+<div class="header">
+    <h2>🌍 AI Agriculture System (Namibia)</h2>
+</div>
+
+<div class="container">
+
+    <!-- LEFT -->
+    <div class="left">
+
+        <div class="box">
+            <h3>📍 Click Map (Select Farm)</h3>
+            <div id="map"></div>
+            <p id="coords">Lat: -22.56 | Lon: 17.06</p>
+        </div>
+
+        <div class="box">
+            <h3>📈 Rainfall Time Series</h3>
+            <canvas id="chart"></canvas>
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+
+        <div class="box">
+            <h3>📊 Results</h3>
+            <p><b>Greenery:</b> <span id="green">35%</span></p>
+            <p><b>Water:</b> <span id="water">12%</span></p>
+            <p><b>Soil:</b> Sandy</p>
+            <p><b>Crops:</b> <span id="crops">Millet, Sorghum</span></p>
+        </div>
+
+        <div class="box">
+            <h3>🤖 Chatbot</h3>
+            <div id="chat"></div>
+            <input id="input" placeholder="Ask something...">
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
