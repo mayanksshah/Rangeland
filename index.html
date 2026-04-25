@@ -1,65 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Agriculture System</title>
+<title>AI Agriculture System</title>
 
-    <link rel="stylesheet" href="style.css">
-
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 </head>
 
 <body>
 
 <div class="header">
-    🌍 AI Agriculture System • Namibia Smart Farming Dashboard
+🌍 Namibia Smart Agriculture Dashboard
 </div>
 
 <div class="container">
 
-    <!-- LEFT -->
-    <div class="left">
+<!-- LEFT -->
+<div class="left">
 
-        <div class="box">
-            <h3>📍 Select Farm Location</h3>
-            <div id="map"></div>
-            <p id="coords">Lat: -22.56 | Lon: 17.06</p>
-        </div>
+<div class="box">
+<h3>📍 Select Location</h3>
+<div id="map"></div>
+<p id="coords">Lat: -22.56 | Lon: 17.06</p>
+</div>
 
-        <div class="box">
-            <h3>📈 Rainfall Time Series</h3>
-            <canvas id="chart"></canvas>
-        </div>
+<div class="box">
+<h3>📊 Choose Graph</h3>
 
-    </div>
+<select id="graphType">
+<option value="rain">Rainfall</option>
+<option value="temp">Temperature</option>
+<option value="combined">Combined</option>
+</select>
 
-    <!-- RIGHT -->
-    <div class="right">
+<canvas id="chart"></canvas>
 
-        <div class="box">
-            <h3>📊 Environmental Insights</h3>
-
-            <div class="metric">🌿 Greenery: <span id="green">35%</span></div>
-            <div class="metric">💧 Water: <span id="water">12%</span></div>
-            <div class="metric">🧱 Soil: Sandy</div>
-            <div class="metric">🌍 Land: Grassland</div>
-            <div class="metric">🐄 Grazing: Good</div>
-            <div class="metric">🌾 Crops: <span id="crops">Mahangu</span></div>
-
-        </div>
-
-        <div class="box">
-            <h3>🤖 Chatbot</h3>
-            <div id="chat"></div>
-            <input id="input" placeholder="Ask about crops, soil, water...">
-        </div>
-
-    </div>
+<button onclick="downloadImage()">Download JPG</button>
+<button onclick="downloadPDF()">Download PDF</button>
 
 </div>
 
-<!-- Scripts -->
+</div>
+
+<!-- RIGHT -->
+<div class="right">
+
+<div class="box">
+<h3>📊 Results</h3>
+
+<p>🌿 Greenery: <span id="green">--</span></p>
+<p>💧 Water: <span id="water">--</span></p>
+<p>🌾 Crops: <span id="crops">--</span></p>
+
+</div>
+
+<div class="box">
+<h3>🤖 Chatbot</h3>
+<div id="chat"></div>
+<input id="input" placeholder="Ask something...">
+</div>
+
+</div>
+
+</div>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
