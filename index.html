@@ -12,7 +12,7 @@
 
 <div class="header">🌍 Namibia Agriculture Intelligence System</div>
 
-<p id="loading">⏳ First time loading may take a few seconds...</p>
+<p id="loading">⏳ First load may take few seconds...</p>
 
 <div class="container">
 
@@ -26,7 +26,7 @@ Lon: <input id="lonInput" value="17.06">
 <button onclick="manualLocate()">Go</button>
 </div>
 
-<p id="place">📍 Location: --</p>
+<p id="place"></p>
 <p><b>Lat:</b> <span id="lat"></span> | <b>Lon:</b> <span id="lon"></span></p>
 
 <select id="graphType">
@@ -34,20 +34,7 @@ Lon: <input id="lonInput" value="17.06">
 <option value="temp">Temperature</option>
 <option value="ndvi">NDVI</option>
 <option value="combined">Combined</option>
-<option value="moving">Moving Avg</option>
-<option value="variability">Variability</option>
-<option value="cumulative">Cumulative</option>
 <option value="growth">Growth Index</option>
-<option value="correlation">Rain vs Temp</option>
-<option value="distribution">Rain Distribution</option>
-<option value="index">Agri Index</option>
-</select>
-
-<select id="chartStyle">
-<option value="line">Line</option>
-<option value="bar">Bar</option>
-<option value="pie">Pie</option>
-<option value="heat">Heatmap</option>
 </select>
 
 <canvas id="chart"></canvas>
@@ -59,19 +46,18 @@ Lon: <input id="lonInput" value="17.06">
 <h3>📊 Results</h3>
 
 <p><b>Temperature:</b> <span id="tempVal"></span></p>
-<p><b>Humidity:</b> <span id="humidity"></span></p>
 <p><b>Rainfall:</b> <span id="rainVal"></span></p>
 <p><b>NDVI:</b> <span id="ndviVal"></span></p>
 
-<p><b>Land Type:</b> <span id="land"></span></p>
+<p><b>Land:</b> <span id="land"></span></p>
 <p><b>Recommendation:</b> <span id="rec"></span></p>
 
-<p id="analysis"></p>
+<div id="cropDetails"></div>
 
 <div class="box">
-<h3>🤖 Namibia Agriculture Chatbot</h3>
+<h3>🤖 Chatbot</h3>
 <div id="chat"></div>
-<input id="input" placeholder="Ask about Namibia agriculture...">
+<input id="input" placeholder="Ask about Namibia farming...">
 </div>
 
 </div>
