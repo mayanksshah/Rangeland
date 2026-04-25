@@ -6,8 +6,7 @@ L.tileLayer(
 
 var marker = L.marker([-22.56,17.06]).addTo(map);
 
-let chart;
-let globalData;
+let chart, globalData;
 
 // -----------------------------
 // REVERSE GEOCODING
@@ -16,21 +15,20 @@ async function getPlace(lat, lon){
 let url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
 let res = await fetch(url);
 let data = await res.json();
-document.getElementById("place").innerText = "📍 " + (data.display_name || "Unknown");
+
+let name = data.display_name || "Unknown";
+document.getElementById("place").innerText = "📍 " + name;
 }
 
 // -----------------------------
-// CLASSIFICATION LOGIC
+// CLASSIFICATION
 // -----------------------------
 function classify(ndvi){
 
-if(ndvi < 0.2) return ["Barren Land", "❌ No crops possible"];
-
-if(ndvi < 0.35) return ["Bushy Land", "🐄 Good for grazing"];
-
-if(ndvi < 0.5) return ["Moderate Land", "🌾 Groundnut, Cowpeas"];
-
-return ["Fertile Land", "🌱 Vegetables, Maize"];
+if(ndvi < 0.15) return ["Barren Land","❌ No farming possible"];
+if(ndvi < 0.3) return ["Bushy Land","🐄 Suitable for grazing"];
+if(ndvi < 0.45) return ["Moderate Land","🌾 Groundnut, Cowpeas"];
+return ["Fertile Land","🌱 Vegetables, Maize"];
 }
 
 // -----------------------------
@@ -51,7 +49,6 @@ let data = await res.json();
 let rain = data.daily.precipitation_sum;
 let temp = data.daily.temperature_2m_max;
 
-// NDVI approx
 let ndviArr = rain.map(r => (r*0.02)+0.2);
 let ndvi = ndviArr[0];
 
@@ -74,48 +71,28 @@ function drawChart(){
 
 if(!globalData) return;
 
+let {labels,rain,temp,ndvi} = globalData;
 let type = document.getElementById("graphType").value;
 let style = document.getElementById("chartStyle").value;
 
-let {labels,rain,temp,ndvi} = globalData;
-
 if(chart) chart.destroy();
 
-let dataset;
+let dataset = rain;
 
-if(type==="rain") dataset = rain;
-if(type==="temp") dataset = temp;
-if(type==="ndvi") dataset = ndvi;
-
-if(type==="combined"){
-chart = new Chart(chartCanvas(),{
-type:"line",
-data:{
-labels,
-datasets:[
-{label:"Rain",data:rain},
-{label:"Temp",data:temp}
-]
-}
-});
-return;
-}
-
-// Heatmap simulation
-if(style==="heat"){
-dataset = dataset.map(v => v*10);
-style = "bar";
-}
+if(type==="temp") dataset=temp;
+if(type==="ndvi") dataset=ndvi;
 
 if(style==="pie"){
 chart = new Chart(chartCanvas(),{
 type:"pie",
-data:{
-labels,
-datasets:[{data:dataset}]
-}
+data:{labels,datasets:[{data:dataset}]}
 });
 return;
+}
+
+if(style==="heat"){
+dataset = dataset.map(v=>v*10);
+style="bar";
 }
 
 chart = new Chart(chartCanvas(),{
@@ -124,37 +101,72 @@ data:{labels,datasets:[{label:type,data:dataset}]}
 });
 }
 
-function chartCanvas(){
-return document.getElementById("chart");
-}
+function chartCanvas(){ return document.getElementById("chart"); }
 
 // -----------------------------
-// MAP CLICK
+// MAP
 // -----------------------------
 map.on('click', function(e){
 marker.setLatLng(e.latlng);
 loadData(e.latlng.lat,e.latlng.lng);
 });
 
-// -----------------------------
-// MANUAL INPUT
-// -----------------------------
 function manualLocate(){
-
-let lat = parseFloat(document.getElementById("latInput").value);
-let lon = parseFloat(document.getElementById("lonInput").value);
-
+let lat=parseFloat(latInput.value);
+let lon=parseFloat(lonInput.value);
 map.setView([lat,lon],6);
 marker.setLatLng([lat,lon]);
-
 loadData(lat,lon);
 }
 
 // -----------------------------
-document.getElementById("graphType").addEventListener("change",drawChart);
-document.getElementById("chartStyle").addEventListener("change",drawChart);
-
+// CHATBOT (FINAL)
 // -----------------------------
-// LOAD DEFAULT
+const faq = {
+"crops":"Main Namibia crops: Mahangu, Sorghum, Groundnut, Cowpeas.",
+"how to grow mahangu":"Mahangu requires low rainfall, sandy soil, and is drought resistant.",
+"agriculture in namibia":"Namibia agriculture is mainly rain-fed and focuses on drought-resistant crops.",
+"support":"Ministry of Agriculture Namibia: +264 61 2087111",
+"email":"info@mawf.gov.na"
+};
+
+async function askAI(q){
+let res = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-small",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({inputs:"Answer for Namibia agriculture: "+q})
+});
+let data = await res.json();
+return data[0]?.generated_text || "No response";
+}
+
+document.getElementById("input").addEventListener("keydown", async function(e){
+
+if(e.key==="Enter"){
+
+let q=this.value.toLowerCase();
+let chat=document.getElementById("chat");
+
+chat.innerHTML+="<p><b>User:</b>"+q+"</p>";
+
+let answered=false;
+
+for(let key in faq){
+if(q.includes(key)){
+chat.innerHTML+="<p><b>Bot:</b>"+faq[key]+"</p>";
+answered=true;
+break;
+}
+}
+
+if(!answered){
+let reply=await askAI(q);
+chat.innerHTML+="<p><b>Bot:</b>"+reply+"</p>";
+}
+
+this.value="";
+}
+});
+
 // -----------------------------
 loadData(-22.56,17.06);
