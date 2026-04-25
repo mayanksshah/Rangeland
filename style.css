@@ -11,12 +11,7 @@ text-align:center;
 
 .left,.right {width:50%;padding:10px;}
 
-#map {height:300px;border-radius:10px;}
-
-.inputBox input {
-width:80px;
-margin:5px;
-}
+#map {height:320px;border-radius:10px;}
 
 #chat {
 height:200px;
