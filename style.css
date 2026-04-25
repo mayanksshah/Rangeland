@@ -1,28 +1,27 @@
-body {margin:0;font-family:Arial;background:#eef2f7;}
+body {font-family: Arial; margin:0; background:#eef2f7;}
 
 .header {
 background:#2c7a7b;
 color:white;
-padding:12px;
+padding:10px;
 text-align:center;
 }
 
 .container {display:flex;}
 
-.left,.right {width:50%;padding:10px;}
+.left,.right {width:50%; padding:10px;}
 
-#map {height:320px;border-radius:10px;}
+#map {height:300px; border-radius:10px;}
 
 #chat {
-height:200px;
+height:150px;
 overflow:auto;
 background:#fafafa;
 padding:10px;
-border-radius:8px;
+margin-bottom:5px;
 }
 
 #loading {
 text-align:center;
 color:red;
-font-weight:bold;
 }
