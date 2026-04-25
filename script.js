@@ -1,97 +1,129 @@
-// -----------------------------
-// INIT MAP (NAMIBIA SATELLITE)
-// -----------------------------
-var map = L.map('map').setView([-22.56, 17.06], 6);
+// MAP
+var map = L.map('map').setView([-22.56,17.06],6);
 
 L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 ).addTo(map);
 
-var marker = L.marker([-22.56, 17.06]).addTo(map);
+var marker = L.marker([-22.56,17.06]).addTo(map);
 
-// -----------------------------
-// CROP LOGIC (NAMIBIA SPECIFIC)
-// -----------------------------
-function getCrops(green, water){
+let chart;
 
-    if(water > 25){
-        return ["Spinach", "Cabbage", "Potatoes", "Sweet Potatoes", "Cassava"];
-    }
+// CROP LOGIC BASED ON RAIN
+function getCrops(rain){
 
-    if(green > 40){
-        return ["Groundnut", "Cowpeas", "Sorghum"];
-    }
-
-    return ["Mahangu (Pearl Millet)", "Sorghum", "Bambara nuts"];
+if(rain > 5){
+return ["Spinach","Cabbage","Potatoes","Cassava"];
 }
 
-// -----------------------------
-// WEATHER API + GRAPH
-// -----------------------------
-async function loadWeather(lat, lon){
-
-    let url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=2023-01-01&end_date=2023-01-10&daily=precipitation_sum`;
-
-    let res = await fetch(url);
-    let data = await res.json();
-
-    let rain = data.daily.precipitation_sum;
-
-    new Chart(document.getElementById("chart"), {
-        type: 'line',
-        data: {
-            labels: data.daily.time,
-            datasets: [{
-                label: "Rainfall",
-                data: rain,
-                borderWidth: 2
-            }]
-        }
-    });
+if(rain > 2){
+return ["Groundnut","Cowpeas","Sorghum"];
 }
 
-// -----------------------------
-// MAP CLICK EVENT
-// -----------------------------
-map.on('click', function(e) {
+return ["Mahangu","Bambara nuts"];
+}
 
-    var lat = e.latlng.lat.toFixed(4);
-    var lon = e.latlng.lng.toFixed(4);
+// LOAD WEATHER
+async function loadWeather(lat,lon){
 
-    marker.setLatLng(e.latlng);
+let url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=2023-01-01&end_date=2023-01-10&daily=temperature_2m_max,precipitation_sum`;
 
-    document.getElementById("coords").innerText = "Lat: " + lat + " | Lon: " + lon;
+let res = await fetch(url);
+let data = await res.json();
 
-    // Namibia realistic values
-    let green = Math.floor(Math.random() * 40 + 20);
-    let water = Math.floor(Math.random() * 20);
+let rain = data.daily.precipitation_sum;
+let temp = data.daily.temperature_2m_max;
 
-    document.getElementById("green").innerText = green + "%";
-    document.getElementById("water").innerText = water + "%";
+let avgRain = rain.reduce((a,b)=>a+b,0)/rain.length;
 
-    let crops = getCrops(green, water);
+document.getElementById("green").innerText = (avgRain*10).toFixed(0)+"%";
+document.getElementById("water").innerText = avgRain.toFixed(1);
 
-    document.getElementById("crops").innerText = crops.join(", ");
+let crops = getCrops(avgRain);
+document.getElementById("crops").innerText = crops.join(", ");
 
-    // Load real weather
-    loadWeather(lat, lon);
+drawChart(data.daily.time,rain,temp);
+}
+
+// DRAW GRAPH
+function drawChart(labels,rain,temp){
+
+let type = document.getElementById("graphType").value;
+
+if(chart) chart.destroy();
+
+if(type==="rain"){
+chart = new Chart(document.getElementById("chart"),{
+type:"line",
+data:{labels,datasets:[{label:"Rainfall",data:rain}]}
+});
+}
+
+if(type==="temp"){
+chart = new Chart(document.getElementById("chart"),{
+type:"line",
+data:{labels,datasets:[{label:"Temperature",data:temp}]}
+});
+}
+
+if(type==="combined"){
+chart = new Chart(document.getElementById("chart"),{
+type:"line",
+data:{
+labels,
+datasets:[
+{label:"Rainfall",data:rain},
+{label:"Temperature",data:temp}
+]
+}
+});
+}
+}
+
+// MAP CLICK
+map.on('click', function(e){
+
+let lat = e.latlng.lat;
+let lon = e.latlng.lng;
+
+marker.setLatLng(e.latlng);
+
+document.getElementById("coords").innerText =
+"Lat: "+lat.toFixed(3)+" Lon: "+lon.toFixed(3);
+
+loadWeather(lat,lon);
+
 });
 
-// -----------------------------
+// GRAPH SWITCH
+document.getElementById("graphType").addEventListener("change",()=>{
+loadWeather(marker.getLatLng().lat, marker.getLatLng().lng);
+});
+
+// DOWNLOAD JPG
+function downloadImage(){
+let url = document.getElementById("chart").toDataURL("image/jpeg");
+let a = document.createElement("a");
+a.href = url;
+a.download = "chart.jpg";
+a.click();
+}
+
+// DOWNLOAD PDF
+function downloadPDF(){
+let img = document.getElementById("chart").toDataURL("image/jpeg");
+
+let win = window.open("");
+win.document.write("<img src='"+img+"'/>");
+win.print();
+}
+
 // CHATBOT
-// -----------------------------
-document.getElementById("input").addEventListener("keydown", function(e){
-
-    if(e.key === "Enter"){
-
-        let val = this.value;
-        let chat = document.getElementById("chat");
-
-        chat.innerHTML += "<p><b>User:</b> " + val + "</p>";
-
-        chat.innerHTML += "<p><b>Bot:</b> Based on environmental conditions, suitable crops are: "
-            + document.getElementById("crops").innerText + "</p>";
-
-        this.value = "";
-    }
+document.getElementById("input").addEventListener("keydown",function(e){
+if(e.key==="Enter"){
+let chat = document.getElementById("chat");
+chat.innerHTML += "<p><b>User:</b>"+this.value+"</p>";
+chat.innerHTML += "<p><b>Bot:</b> Crops: "+document.getElementById("crops").innerText+"</p>";
+this.value="";
+}
 });
