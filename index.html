@@ -10,15 +10,22 @@
 
 <body>
 
-<div class="header">
-🌍 Namibia Smart Agriculture Dashboard
-</div>
+<div class="header">🌍 Namibia Smart Agriculture Dashboard</div>
 
 <div class="container">
 
 <div class="left">
 
 <div id="map"></div>
+
+<div class="inputBox">
+Lat: <input id="latInput" value="-22.56">
+Lon: <input id="lonInput" value="17.06">
+<button onclick="manualLocate()">Go</button>
+</div>
+
+<p id="place">📍 Location: --</p>
+<p><b>Lat:</b> <span id="lat">--</span> | <b>Lon:</b> <span id="lon">--</span></p>
 
 <select id="graphType">
 <option value="rain">Rainfall</option>
@@ -31,6 +38,13 @@
 <option value="growth">Growth Index</option>
 </select>
 
+<select id="chartStyle">
+<option value="line">Line</option>
+<option value="bar">Bar</option>
+<option value="pie">Pie</option>
+<option value="heat">Heatmap</option>
+</select>
+
 <canvas id="chart"></canvas>
 
 </div>
@@ -38,15 +52,10 @@
 <div class="right">
 
 <h3>📊 Results</h3>
-<p>Crop: <span id="crop">--</span></p>
-<p>NDVI: <span id="ndviVal">--</span></p>
-<p>Yield: <span id="yield">--</span></p>
 
-<div class="box">
-<h3>🤖 Chatbot</h3>
-<div id="chat"></div>
-<input id="input" placeholder="Ask something...">
-</div>
+<p><b>🌿 NDVI:</b> <span id="ndviVal">--</span></p>
+<p><b>🌍 Land Type:</b> <span id="land">--</span></p>
+<p><b>🌾 Recommendation:</b> <span id="rec">--</span></p>
 
 </div>
 
