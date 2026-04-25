@@ -1,6 +1,23 @@
 body {margin:0;font-family:Arial;background:#eef2f7;}
-.header {background:#2c7a7b;color:white;padding:12px;text-align:center;}
+
+.header {
+background:#2c7a7b;
+color:white;
+padding:12px;
+text-align:center;
+font-size:18px;
+}
+
 .container {display:flex;}
+
 .left,.right {width:50%;padding:10px;}
-#map {height:350px;}
-#chat {height:200px;overflow:auto;background:#fafafa;padding:10px;}
+
+#map {height:350px;border-radius:10px;}
+
+#chat {
+height:200px;
+overflow:auto;
+background:#fafafa;
+padding:10px;
+border-radius:8px;
+}
