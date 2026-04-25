@@ -1,71 +1,101 @@
 var map = L.map('map').setView([-22.56,17.06],6);
 
-L.tileLayer(
+// MAP LAYERS
+var sat = L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-).addTo(map);
+);
+
+var terrain = L.tileLayer(
+'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
+);
+
+var osm = L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+);
+
+sat.addTo(map);
+
+L.control.layers({
+"Satellite": sat,
+"Terrain": terrain,
+"Map": osm
+}).addTo(map);
 
 var marker = L.marker([-22.56,17.06]).addTo(map);
 
-let chart, globalData;
+let chart;
+let globalData;
 
-// -----------------------------
-// REVERSE GEOCODING
 // -----------------------------
 async function getPlace(lat, lon){
-let url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
-let res = await fetch(url);
+let res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
 let data = await res.json();
-
-let name = data.display_name || "Unknown";
-document.getElementById("place").innerText = "📍 " + name;
+document.getElementById("place").innerText = "📍 " + (data.display_name || "Unknown");
 }
 
 // -----------------------------
-// CLASSIFICATION
-// -----------------------------
-function classify(ndvi){
+function classify(ndvi, avgRain){
 
-if(ndvi < 0.15) return ["Barren Land","❌ No farming possible"];
-if(ndvi < 0.3) return ["Bushy Land","🐄 Suitable for grazing"];
-if(ndvi < 0.45) return ["Moderate Land","🌾 Groundnut, Cowpeas"];
+if(ndvi < 0.15 && avgRain < 2)
+return ["Barren Land","❌ No farming possible"];
+
+if(ndvi < 0.18 && avgRain > 3)
+return ["Water Body","💧 Fish farming recommended"];
+
+if(ndvi < 0.3)
+return ["Bushy Land","🐄 Good for grazing"];
+
+if(ndvi < 0.45)
+return ["Moderate Land","🌾 Groundnut, Cowpeas"];
+
 return ["Fertile Land","🌱 Vegetables, Maize"];
 }
 
 // -----------------------------
-// LOAD DATA
-// -----------------------------
 async function loadData(lat,lon){
+
+document.getElementById("loading").style.display="block";
 
 document.getElementById("lat").innerText = lat.toFixed(4);
 document.getElementById("lon").innerText = lon.toFixed(4);
 
-getPlace(lat,lon);
+await getPlace(lat,lon);
 
-let url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=2023-01-01&end_date=2023-01-15&daily=temperature_2m_max,precipitation_sum`;
-
-let res = await fetch(url);
+let res = await fetch(`https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=2023-01-01&end_date=2023-01-15&daily=temperature_2m_max,precipitation_sum`);
 let data = await res.json();
 
 let rain = data.daily.precipitation_sum;
 let temp = data.daily.temperature_2m_max;
 
+let avgRain = rain.reduce((a,b)=>a+b,0)/rain.length;
+let avgTemp = temp.reduce((a,b)=>a+b,0)/temp.length;
+
 let ndviArr = rain.map(r => (r*0.02)+0.2);
 let ndvi = ndviArr[0];
 
+let humidity = Math.min(80, avgRain*10);
+
+// UI update
+document.getElementById("tempVal").innerText = avgTemp.toFixed(1)+" °C";
+document.getElementById("rainVal").innerText = avgRain.toFixed(1)+" mm";
+document.getElementById("humidity").innerText = humidity.toFixed(0)+" %";
 document.getElementById("ndviVal").innerText = ndvi.toFixed(2);
 
-let [land, rec] = classify(ndvi);
+let [land, rec] = classify(ndvi, avgRain);
 
 document.getElementById("land").innerText = land;
 document.getElementById("rec").innerText = rec;
 
+document.getElementById("analysis").innerText =
+"Analysis: Based on rainfall, temperature and NDVI, this area is classified as " + land;
+
 globalData = {labels:data.daily.time,rain,temp,ndvi:ndviArr};
 
 drawChart();
+
+document.getElementById("loading").style.display="none";
 }
 
-// -----------------------------
-// GRAPH
 // -----------------------------
 function drawChart(){
 
@@ -82,17 +112,67 @@ let dataset = rain;
 if(type==="temp") dataset=temp;
 if(type==="ndvi") dataset=ndvi;
 
+if(type==="combined"){
+chart = new Chart(chartCanvas(),{
+type:"line",
+data:{
+labels,
+datasets:[
+{label:"Rain",data:rain},
+{label:"Temp",data:temp}
+]
+}
+});
+return;
+}
+
+if(type==="correlation"){
+chart = new Chart(chartCanvas(),{
+type:"scatter",
+data:{
+datasets:[{
+label:"Rain vs Temp",
+data: rain.map((r,i)=>({x:r,y:temp[i]}))
+}]
+}
+});
+return;
+}
+
+if(type==="cumulative"){
+let cum=[];
+rain.reduce((a,b,i)=>cum[i]=a+b,0);
+dataset=cum;
+}
+
+if(type==="moving"){
+dataset=rain.map((_,i,arr)=>{
+let slice=arr.slice(Math.max(0,i-2),i+1);
+return slice.reduce((a,b)=>a+b)/slice.length;
+});
+}
+
+if(type==="variability"){
+let mean=avg(rain);
+dataset=rain.map(v=>(v-mean)**2);
+style="bar";
+}
+
+if(type==="index"){
+dataset=rain.map((r,i)=>r*0.6+temp[i]*0.4);
+}
+
+if(style==="heat"){
+dataset=dataset.map(v=>v*10);
+style="bar";
+}
+
 if(style==="pie"){
 chart = new Chart(chartCanvas(),{
 type:"pie",
 data:{labels,datasets:[{data:dataset}]}
 });
 return;
-}
-
-if(style==="heat"){
-dataset = dataset.map(v=>v*10);
-style="bar";
 }
 
 chart = new Chart(chartCanvas(),{
@@ -103,8 +183,8 @@ data:{labels,datasets:[{label:type,data:dataset}]}
 
 function chartCanvas(){ return document.getElementById("chart"); }
 
-// -----------------------------
-// MAP
+function avg(arr){ return arr.reduce((a,b)=>a+b,0)/arr.length; }
+
 // -----------------------------
 map.on('click', function(e){
 marker.setLatLng(e.latlng);
@@ -120,13 +200,16 @@ loadData(lat,lon);
 }
 
 // -----------------------------
-// CHATBOT (FINAL)
+document.getElementById("graphType").addEventListener("change",drawChart);
+document.getElementById("chartStyle").addEventListener("change",drawChart);
+
+// -----------------------------
+// CHATBOT
 // -----------------------------
 const faq = {
-"crops":"Main Namibia crops: Mahangu, Sorghum, Groundnut, Cowpeas.",
-"how to grow mahangu":"Mahangu requires low rainfall, sandy soil, and is drought resistant.",
-"agriculture in namibia":"Namibia agriculture is mainly rain-fed and focuses on drought-resistant crops.",
-"support":"Ministry of Agriculture Namibia: +264 61 2087111",
+"crops":"Namibia crops: Mahangu, Sorghum, Groundnut, Cowpeas.",
+"how to grow":"Use drought-resistant crops and seasonal rainfall.",
+"support":"+264 61 2087111 Agriculture Ministry Namibia",
 "email":"info@mawf.gov.na"
 };
 
@@ -134,7 +217,7 @@ async function askAI(q){
 let res = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-small",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({inputs:"Answer for Namibia agriculture: "+q})
+body:JSON.stringify({inputs:"Namibia agriculture answer: "+q})
 });
 let data = await res.json();
 return data[0]?.generated_text || "No response";
