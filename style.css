@@ -1,4 +1,4 @@
-body { margin:0; font-family:Arial; background:#eef2f7; }
+body {margin:0;font-family:Arial;background:#eef2f7;}
 
 .header {
 background:#2c7a7b;
@@ -7,17 +7,8 @@ padding:12px;
 text-align:center;
 }
 
-.container { display:flex; padding:10px; }
+.container {display:flex;}
 
-.left,.right { width:50%; padding:10px; }
+.left,.right {width:50%;padding:10px;}
 
-.box {
-background:white;
-padding:12px;
-margin-bottom:10px;
-border-radius:10px;
-}
-
-#map { height:300px; }
-
-#chat { height:200px; overflow:auto; background:#fafafa; padding:10px; }
+#map {height:350px;}
