@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Namibia Agriculture AI</title>
+<title>Namibia Agriculture System</title>
 
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
@@ -10,9 +10,9 @@
 
 <body>
 
-<div class="header">🌍 Namibia Agriculture Intelligence System</div>
+<h2 class="header">🌍 Namibia Agriculture Intelligence System</h2>
 
-<p id="loading">⏳ First load may take few seconds...</p>
+<p id="loading">⏳ Loading data... please wait</p>
 
 <div class="container">
 
@@ -20,45 +20,45 @@
 
 <div id="map"></div>
 
-<div class="inputBox">
+<div class="inputs">
 Lat: <input id="latInput" value="-22.56">
 Lon: <input id="lonInput" value="17.06">
 <button onclick="manualLocate()">Go</button>
 </div>
 
 <p id="place"></p>
-<p><b>Lat:</b> <span id="lat"></span> | <b>Lon:</b> <span id="lon"></span></p>
 
 <select id="graphType">
 <option value="rain">Rainfall</option>
 <option value="temp">Temperature</option>
 <option value="ndvi">NDVI</option>
 <option value="combined">Combined</option>
-<option value="growth">Growth Index</option>
 </select>
 
 <canvas id="chart"></canvas>
+
+<br>
+<button onclick="downloadImage()">Download JPG</button>
+<button onclick="downloadPDF()">Download PDF</button>
 
 </div>
 
 <div class="right">
 
-<h3>📊 Results</h3>
+<h3>Results</h3>
 
-<p><b>Temperature:</b> <span id="tempVal"></span></p>
-<p><b>Rainfall:</b> <span id="rainVal"></span></p>
-<p><b>NDVI:</b> <span id="ndviVal"></span></p>
+<p>Temperature: <span id="tempVal"></span></p>
+<p>Rainfall: <span id="rainVal"></span></p>
+<p>NDVI: <span id="ndviVal"></span></p>
 
-<p><b>Land:</b> <span id="land"></span></p>
-<p><b>Recommendation:</b> <span id="rec"></span></p>
+<p>Land: <span id="land"></span></p>
+<p>Recommendation: <span id="rec"></span></p>
 
 <div id="cropDetails"></div>
 
-<div class="box">
-<h3>🤖 Chatbot</h3>
+<h3>Chatbot</h3>
 <div id="chat"></div>
-<input id="input" placeholder="Ask about Namibia farming...">
-</div>
+<input id="input" placeholder="Ask about crops...">
 
 </div>
 
